@@ -42,11 +42,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           outputs: ["job_docx", "scout_text"]
         })
       });
-      const data = await response.json();
       if (!response.ok) {
-        sendResponse({ ok: false, message: data?.error?.code || "APIエラー" });
+        const responseText = await response.text();
+        let detailMessage = responseText;
+        try {
+          const errorData = JSON.parse(responseText);
+          detailMessage =
+            errorData?.error?.detail || errorData?.error?.message || errorData?.error?.code || responseText;
+        } catch (parseError) {
+          detailMessage = responseText || "APIエラー";
+        }
+        sendResponse({ ok: false, message: detailMessage });
         return;
       }
+      const data = await response.json();
       const docxBlob = base64ToBlob(
         data.docx,
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

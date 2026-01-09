@@ -71,7 +71,11 @@ app.post("/api/generate", async (req, res) => {
     try {
       docxBuffer = renderJobDocx(sanitized, templatePath);
     } catch (error) {
-      return res.status(500).json({ error: { code: "TEMPLATE_RENDER_FAIL", message: "docx render failed" } });
+      console.error(error);
+      const detail = error instanceof Error ? error.message : String(error);
+      return res
+        .status(500)
+        .json({ error: { code: "TEMPLATE_RENDER_FAIL", message: "docx render failed", detail } });
     }
 
     const docxBase64 = docxBuffer.toString("base64");
@@ -83,9 +87,11 @@ app.post("/api/generate", async (req, res) => {
       }
     });
   } catch (error) {
+    console.error(error);
     const message = error instanceof Error ? error.message : "Unknown error";
     const code = message === "LLM_INVALID_JSON" ? "LLM_INVALID_JSON" : "INTERNAL_ERROR";
-    return res.status(500).json({ error: { code, message } });
+    const detail = error instanceof Error ? error.stack ?? error.message : String(error);
+    return res.status(500).json({ error: { code, message, detail } });
   }
 });
 
