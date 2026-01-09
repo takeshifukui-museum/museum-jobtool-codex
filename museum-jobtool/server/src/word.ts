@@ -99,5 +99,5 @@ export const renderJobDocx = (job: JobPosting, templatePath: string): Buffer => 
 };
 
 export const resolveTemplatePath = () => {
-  return path.resolve(process.cwd(), "..", "templates", "museum_template.docx");
+  return path.resolve(__dirname, "../../templates/museum_template.docx");
 };
